@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using WebApi.Models;
 
 namespace WebApi.Controllers
@@ -44,6 +45,7 @@ namespace WebApi.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public ActionResult<FoodCategory> Post([FromBody] FoodCategory value)
         {
@@ -59,6 +61,7 @@ namespace WebApi.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPut("{id}")]
         public ActionResult<FoodCategory> Put(int id, [FromBody] FoodCategory value)
         {
@@ -78,6 +81,7 @@ namespace WebApi.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public ActionResult<FoodCategory> Delete(int id)
         {

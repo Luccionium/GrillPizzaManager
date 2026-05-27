@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using WebApi.Models;
 
 namespace WebApi.Controllers
@@ -44,6 +45,7 @@ namespace WebApi.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public ActionResult<Allergen> Post([FromBody] Allergen value)
         {
@@ -59,6 +61,7 @@ namespace WebApi.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPut("{id}")]
         public ActionResult<Allergen> Put(int id, [FromBody] Allergen value)
         {
@@ -79,6 +82,7 @@ namespace WebApi.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public ActionResult<Allergen> Delete(int id)
         {

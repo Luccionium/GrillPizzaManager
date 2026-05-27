@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WebApi.DTOs;
 using WebApi.Models;
@@ -83,6 +84,7 @@ namespace WebApi.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public ActionResult<Food> Post([FromBody] Food value)
         {
@@ -98,6 +100,7 @@ namespace WebApi.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPut("{id}")]
         public ActionResult<Food> Put(int id, [FromBody] Food value)
         {
@@ -122,6 +125,7 @@ namespace WebApi.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public ActionResult<Food> Delete(int id)
         {
