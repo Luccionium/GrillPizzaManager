@@ -13,6 +13,10 @@ public partial class Order
 
     public int UserId { get; set; }
 
+    public string? Note { get; set; }
+
+    public string DeliveryAddress { get; set; } = null!;
+
     public virtual ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
 
     public virtual User User { get; set; } = null!;

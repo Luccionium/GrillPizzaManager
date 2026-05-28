@@ -1,0 +1,58 @@
+﻿@model IEnumerable<WebApp.Models.Order>
+
+@{
+    ViewData["Title"] = "My Orders";
+}
+
+<h2>My Orders</h2>
+<hr />
+
+@if (!Model.Any())
+{
+    <p>You have no orders yet. <a asp-action="Index">Go to menu</a></p>
+}
+else
+{
+    foreach (var order in Model)
+    {
+        <div class="card mb-3">
+            <div class="card-header d-flex justify-content-between">
+                <span><strong>Order #@order.Id</strong></span>
+                <span>@order.CreatedAt.ToString("dd.MM.yyyy HH:mm")</span>
+            </div>
+            <div class="card-body">
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th>Quantity</th>
+                            <th>Unit Price</th>
+                            <th>Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in order.OrderItems)
+                        {
+                            <tr>
+                                <td>@item.Food?.Title</td>
+                                <td>@item.Quantity</td>
+                                <td>@item.UnitPrice €</td>
+                                <td>@(item.Quantity* item.UnitPrice) €</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+                @if (!string.IsNullOrEmpty(order.Note))
+                {
+                    <p><strong>Note:</strong> @order.Note</p>
+                    <p><strong>Adresa dostave:</strong> @order.DeliveryAddress</p>
+                }
+            </div>
+            <div class="card-footer d-flex justify-content-end">
+                <strong>Total: @order.TotalPrice €</strong>
+            </div>
+        </div>
+    }
+}
+
+<a asp-action="Index" class="btn btn-secondary">Back to Menu</a>

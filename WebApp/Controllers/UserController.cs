@@ -21,6 +21,7 @@ namespace WebApp.Controllers
         [HttpGet]
         public IActionResult Login(string returnUrl)
         {
+            ModelState.Clear();
             var loginVm = new LoginVM { ReturnUrl = returnUrl };
             return View(loginVm);
         }

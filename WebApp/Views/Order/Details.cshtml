@@ -1,0 +1,53 @@
+﻿@model WebApp.Models.Order
+
+@{
+    ViewData["Title"] = "Order Details";
+}
+
+<h2>Order Details</h2>
+<hr />
+
+<dl class="row">
+    <dt class="col-sm-2">Adresa dostave</dt>
+    <dd class="col-sm-10">@Model.DeliveryAddress</dd>
+
+    <dt class="col-sm-2">Note</dt>
+    <dd class="col-sm-10">@(string.IsNullOrEmpty(Model.Note) ? "No note" : Model.Note)</dd>
+
+    <dt class="col-sm-2">Order Id</dt>
+    <dd class="col-sm-10">@Model.Id</dd>
+
+    <dt class="col-sm-2">Customer</dt>
+    <dd class="col-sm-10">@Model.User?.Username</dd>
+
+    <dt class="col-sm-2">Date</dt>
+    <dd class="col-sm-10">@Model.CreatedAt.ToString("dd.MM.yyyy HH:mm")</dd>
+
+    <dt class="col-sm-2">Total Price</dt>
+    <dd class="col-sm-10">@Model.TotalPrice €</dd>
+</dl>
+
+<h4>Items</h4>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Food</th>
+            <th>Quantity</th>
+            <th>Unit Price</th>
+            <th>Subtotal</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.OrderItems)
+        {
+            <tr>
+                <td>@item.Food?.Title</td>
+                <td>@item.Quantity</td>
+                <td>@item.UnitPrice €</td>
+                <td>@(item.Quantity* item.UnitPrice) €</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<a asp-action="Index" class="btn btn-secondary">Back to Orders</a>
