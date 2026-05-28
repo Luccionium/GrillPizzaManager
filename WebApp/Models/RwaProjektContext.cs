@@ -23,6 +23,8 @@ public partial class RwaProjektContext : DbContext
 
     public virtual DbSet<FoodCategory> FoodCategories { get; set; }
 
+    public virtual DbSet<Log> Logs { get; set; }
+
     public virtual DbSet<Order> Orders { get; set; }
 
     public virtual DbSet<OrderItem> OrderItems { get; set; }
@@ -50,7 +52,7 @@ public partial class RwaProjektContext : DbContext
             entity.ToTable("Food");
 
             entity.Property(e => e.Description).HasMaxLength(1024);
-            entity.Property(e => e.ImageUrl).HasMaxLength(512);
+            entity.Property(e => e.ImageUrl).HasMaxLength(2048);
             entity.Property(e => e.IsAvailable).HasDefaultValue(true);
             entity.Property(e => e.Price).HasColumnType("decimal(10, 2)");
             entity.Property(e => e.Title).HasMaxLength(256);
@@ -81,6 +83,15 @@ public partial class RwaProjektContext : DbContext
             entity.ToTable("FoodCategory");
 
             entity.Property(e => e.Name).HasMaxLength(128);
+        });
+
+        modelBuilder.Entity<Log>(entity =>
+        {
+            entity.ToTable("Log");
+
+            entity.Property(e => e.Level).HasMaxLength(50);
+            entity.Property(e => e.Message).HasMaxLength(1024);
+            entity.Property(e => e.Timestamp).HasDefaultValueSql("(getutcdate())");
         });
 
         modelBuilder.Entity<Order>(entity =>

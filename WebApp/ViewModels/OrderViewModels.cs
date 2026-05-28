@@ -1,10 +1,13 @@
-﻿namespace WebApp.ViewModels
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace WebApp.ViewModels
 {
     public class PlaceOrderDto
     {
         public List<OrderItemDto> Items { get; set; } = new();
         public string? Note { get; set; }
 
+        [Required(ErrorMessage = "Adresa dostave je obavezna")]
         public string? DeliveryAddress { get; set; }
     }
 

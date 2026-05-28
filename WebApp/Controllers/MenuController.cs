@@ -49,6 +49,9 @@ namespace WebApp.Controllers
                 if (user == null)
                     return Unauthorized();
 
+                if (string.IsNullOrEmpty(orderDto.DeliveryAddress))
+                    return BadRequest("Delivery address is required");
+
                 var order = new Order
                 {
                     UserId = user.Id,
