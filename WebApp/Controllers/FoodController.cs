@@ -36,9 +36,18 @@ namespace WebApp.Controllers
         [HttpPost]
         public IActionResult Create(Food food, int[] selectedAllergens)
         {
-
             if (!ModelState.IsValid)
             {
+                ViewBag.Categories = new SelectList(_context.FoodCategories, "Id", "Name");
+                ViewBag.Allergens = _context.Allergens.ToList();
+                return View(food);
+            }
+
+            var existing = _context.Foods
+                .FirstOrDefault(x => x.Title == food.Title);
+            if (existing != null)
+            {
+                ModelState.AddModelError("Title", "Jelo s tim nazivom već postoji");
                 ViewBag.Categories = new SelectList(_context.FoodCategories, "Id", "Name");
                 ViewBag.Allergens = _context.Allergens.ToList();
                 return View(food);
@@ -56,7 +65,6 @@ namespace WebApp.Controllers
                 });
             }
             _context.SaveChanges();
-
             return RedirectToAction("Index");
         }
 
@@ -87,6 +95,17 @@ namespace WebApp.Controllers
                 return View(food);
             }
 
+            var duplicate = _context.Foods
+                .FirstOrDefault(x => x.Title == food.Title && x.Id != id);
+            if (duplicate != null)
+            {
+                ModelState.AddModelError("Title", "Jelo s tim nazivom već postoji");
+                ViewBag.Categories = new SelectList(_context.FoodCategories, "Id", "Name");
+                ViewBag.Allergens = _context.Allergens.ToList();
+                ViewBag.SelectedAllergens = selectedAllergens.ToList();
+                return View(food);
+            }
+
             var existing = _context.Foods
                 .Include(f => f.FoodAllergens)
                 .FirstOrDefault(x => x.Id == id);
@@ -101,7 +120,6 @@ namespace WebApp.Controllers
             existing.IsAvailable = food.IsAvailable;
             existing.FoodCategoryId = food.FoodCategoryId;
 
-            // Ažuriraj alergene
             _context.FoodAllergens.RemoveRange(existing.FoodAllergens);
             foreach (var allergenId in selectedAllergens)
             {

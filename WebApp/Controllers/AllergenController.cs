@@ -31,6 +31,14 @@ namespace WebApp.Controllers
             if (!ModelState.IsValid)
                 return View(allergen);
 
+            var existing = _context.Allergens
+                .FirstOrDefault(x => x.Name == allergen.Name);
+            if (existing != null)
+            {
+                ModelState.AddModelError("Name", "Alergen s tim nazivom već postoji");
+                return View(allergen);
+            }
+
             _context.Allergens.Add(allergen);
             _context.SaveChanges();
             return RedirectToAction("Index");
@@ -50,12 +58,20 @@ namespace WebApp.Controllers
             if (!ModelState.IsValid)
                 return View(allergen);
 
-            var existing = _context.Allergens.FirstOrDefault(x => x.Id == id);
-            if (existing == null)
+            var existing = _context.Allergens
+                .FirstOrDefault(x => x.Name == allergen.Name && x.Id != id);
+            if (existing != null)
+            {
+                ModelState.AddModelError("Name", "Alergen s tim nazivom već postoji");
+                return View(allergen);
+            }
+
+            var existing2 = _context.Allergens.FirstOrDefault(x => x.Id == id);
+            if (existing2 == null)
                 return NotFound();
 
-            existing.Name = allergen.Name;
-            existing.Description = allergen.Description;
+            existing2.Name = allergen.Name;
+            existing2.Description = allergen.Description;
             _context.SaveChanges();
             return RedirectToAction("Index");
         }

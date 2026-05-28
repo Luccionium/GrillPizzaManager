@@ -32,6 +32,15 @@ namespace WebApp.Controllers
             if (!ModelState.IsValid)
                 return View(category);
 
+            // Provjeri duplikat
+            var existing = _context.FoodCategories
+                .FirstOrDefault(x => x.Name == category.Name);
+            if (existing != null)
+            {
+                ModelState.AddModelError("Name", "Kategorija s tim nazivom već postoji");
+                return View(category);
+            }
+
             _context.FoodCategories.Add(category);
             _context.SaveChanges();
             return RedirectToAction("Index");
@@ -51,11 +60,20 @@ namespace WebApp.Controllers
             if (!ModelState.IsValid)
                 return View(category);
 
-            var existing = _context.FoodCategories.FirstOrDefault(x => x.Id == id);
-            if (existing == null)
+            // Provjeri duplikat (isključi trenutni zapis)
+            var existing = _context.FoodCategories
+                .FirstOrDefault(x => x.Name == category.Name && x.Id != id);
+            if (existing != null)
+            {
+                ModelState.AddModelError("Name", "Kategorija s tim nazivom već postoji");
+                return View(category);
+            }
+
+            var cat = _context.FoodCategories.FirstOrDefault(x => x.Id == id);
+            if (cat == null)
                 return NotFound();
 
-            existing.Name = category.Name;
+            cat.Name = category.Name;
             _context.SaveChanges();
             return RedirectToAction("Index");
         }
