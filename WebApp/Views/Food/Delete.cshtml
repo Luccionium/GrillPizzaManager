@@ -1,0 +1,26 @@
+﻿@model WebApp.Models.Food
+
+@{
+    ViewData["Title"] = "Delete Food";
+}
+
+<h2>Delete Food</h2>
+
+<p>Are you sure you want to delete <strong>@Model.Title</strong>?</p>
+
+<dl class="row">
+    <dt class="col-sm-2">Category</dt>
+    <dd class="col-sm-10">@Model.FoodCategory?.Name</dd>
+
+    <dt class="col-sm-2">Price</dt>
+    <dd class="col-sm-10">@Model.Price €</dd>
+
+    <dt class="col-sm-2">Allergens</dt>
+    <dd class="col-sm-10">@string.Join(", ", Model.FoodAllergens.Select(fa => fa.Allergen.Name))</dd>
+</dl>
+
+<form asp-action="Delete">
+    <input type="hidden" asp-for="Id" />
+    <input type="submit" value="Delete" class="btn btn-danger" />
+    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+</form>

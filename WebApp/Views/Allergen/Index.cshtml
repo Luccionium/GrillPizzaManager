@@ -1,0 +1,31 @@
+﻿@model IEnumerable<WebApp.Models.Allergen>
+
+@{
+    ViewData["Title"] = "Allergens";
+}
+
+<h2>Allergens</h2>
+<a asp-action="Create" class="btn btn-primary mb-3">Add New Allergen</a>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var allergen in Model)
+        {
+            <tr>
+                <td>@allergen.Name</td>
+                <td>@allergen.Description</td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@allergen.Id" class="btn btn-sm btn-warning">Edit</a>
+                    <a asp-action="Delete" asp-route-id="@allergen.Id" class="btn btn-sm btn-danger">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

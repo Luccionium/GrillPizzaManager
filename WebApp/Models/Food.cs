@@ -21,7 +21,7 @@ public partial class Food
 
     public virtual ICollection<FoodAllergen> FoodAllergens { get; set; } = new List<FoodAllergen>();
 
-    public virtual FoodCategory FoodCategory { get; set; } = null!;
+    public virtual FoodCategory? FoodCategory { get; set; }
 
     public virtual ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
 }

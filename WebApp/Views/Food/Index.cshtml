@@ -1,0 +1,48 @@
+﻿@model IEnumerable<WebApp.Models.Food>
+
+@{
+    ViewData["Title"] = "Food";
+}
+
+<h2>Food</h2>
+<a asp-action="Create" class="btn btn-primary mb-3">Add New Food</a>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Title</th>
+            <th>Category</th>
+            <th>Price</th>
+            <th>Available</th>
+            <th>Allergens</th>
+            <th>Actions</th>
+            <th>Image</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var food in Model)
+        {
+            <tr>
+                <td>@food.Title</td>
+                <td>@food.FoodCategory?.Name</td>
+                <td>@food.Price €</td>
+                <td>@(food.IsAvailable ? "Yes" : "No")</td>
+                <td>@string.Join(", ", food.FoodAllergens.Select(fa => fa.Allergen.Name))</td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@food.Id" class="btn btn-sm btn-warning">Edit</a>
+                    <a asp-action="Delete" asp-route-id="@food.Id" class="btn btn-sm btn-danger">Delete</a>
+                </td>
+                <td>
+                    @if (!string.IsNullOrEmpty(food.ImageUrl))
+                    {
+                        <img src="@food.ImageUrl" alt="@food.Title" style="width:80px; height:60px; object-fit:cover;" />
+                    }
+                    else
+                    {
+                        <span class="text-muted">No image</span>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
