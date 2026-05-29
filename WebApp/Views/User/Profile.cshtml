@@ -1,0 +1,106 @@
+﻿@model WebApp.ViewModels.ProfileVM
+
+@{
+    ViewData["Title"] = "My Profile";
+}
+
+<h2>My Profile</h2>
+<hr />
+
+<div class="row">
+    <div class="col-md-4">
+        <dl>
+            <dt>Username</dt>
+            <dd id="Username">@Model.Username</dd>
+
+            <dt>First Name</dt>
+            <dd id="FirstName">@Model.FirstName</dd>
+
+            <dt>Last Name</dt>
+            <dd id="LastName">@Model.LastName</dd>
+
+            <dt>Email</dt>
+            <dd id="Email">@Model.Email</dd>
+
+            <dt>Phone</dt>
+            <dd id="Phone">@Model.Phone</dd>
+        </dl>
+
+        <button id="editProfile" class="btn btn-primary">Edit Profile</button>
+    </div>
+</div>
+
+<!-- Modal za uređivanje -->
+<div class="modal fade" id="editModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Profile</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">First Name</label>
+                    <input id="FirstNameInput" class="form-control" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Last Name</label>
+                    <input id="LastNameInput" class="form-control" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Email</label>
+                    <input type="email" id="EmailInput" class="form-control" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Phone</label>
+                    <input type="tel" id="PhoneInput" class="form-control" />
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button id="saveProfile" type="button" class="btn btn-primary">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const editModalEl = $('#editModal')[0];
+        const editModal = new bootstrap.Modal(editModalEl);
+
+        $('#editProfile').click(function () {
+            $('#FirstNameInput').val($('#FirstName').text().trim());
+            $('#LastNameInput').val($('#LastName').text().trim());
+            $('#EmailInput').val($('#Email').text().trim());
+            $('#PhoneInput').val($('#Phone').text().trim());
+            editModal.show();
+        });
+
+        $('#saveProfile').click(function () {
+            const profile = {
+                firstName: $('#FirstNameInput').val(),
+                lastName: $('#LastNameInput').val(),
+                email: $('#EmailInput').val(),
+                phone: $('#PhoneInput').val()
+            };
+
+            $.ajax({
+                url: '/User/UpdateProfile',
+                method: 'PUT',
+                contentType: 'application/json',
+                data: JSON.stringify(profile)
+            })
+            .done(function () {
+                $('#FirstName').text(profile.firstName);
+                $('#LastName').text(profile.lastName);
+                $('#Email').text(profile.email);
+                $('#Phone').text(profile.phone);
+                editModal.hide();
+            })
+            .fail(function () {
+                alert('Error updating profile. Please try again.');
+            });
+        });
+    </script>
+}

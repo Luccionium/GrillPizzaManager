@@ -39,5 +39,17 @@ namespace WebApp.Controllers
 
             return View(order);
         }
+
+        public IActionResult Users()
+        {
+            var users = _context.Users
+                .Include(u => u.Orders)
+                    .ThenInclude(o => o.OrderItems)
+                        .ThenInclude(oi => oi.Food)
+                .Where(u => u.RoleId == 2) // samo User uloga
+                .ToList();
+
+            return View(users);
+        }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
@@ -129,6 +130,44 @@ namespace WebApp.Controllers
         public IActionResult Forbidden()
         {
             return View();
+        }
+
+        [Authorize]
+        public IActionResult Profile()
+        {
+            var username = HttpContext.User.Identity?.Name;
+            var user = _context.Users.FirstOrDefault(x => x.Username == username);
+            if (user == null)
+                return NotFound();
+
+            var vm = new ProfileVM
+            {
+                Username = user.Username,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Email = user.Email,
+                Phone = user.Phone
+            };
+
+            return View(vm);
+        }
+
+        [Authorize]
+        [HttpPut]
+        public IActionResult UpdateProfile([FromBody] ProfileVM vm)
+        {
+            var username = HttpContext.User.Identity?.Name;
+            var user = _context.Users.FirstOrDefault(x => x.Username == username);
+            if (user == null)
+                return NotFound();
+
+            user.FirstName = vm.FirstName!;
+            user.LastName = vm.LastName!;
+            user.Email = vm.Email!;
+            user.Phone = vm.Phone;
+            _context.SaveChanges();
+
+            return Ok();
         }
     }
 }
