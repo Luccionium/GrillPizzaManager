@@ -42,6 +42,7 @@
                     <p class="card-text"><strong>@food.Price €</strong></p>
                 </div>
                 <div class="card-footer">
+                    <a asp-action="Details" asp-route-id="@food.Id" class="btn btn-secondary btn-sm">Details</a>
                     <button class="btn btn-primary btn-sm add-to-cart"
                             data-id="@food.Id"
                             data-title="@food.Title"

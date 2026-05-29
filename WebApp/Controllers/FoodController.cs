@@ -16,13 +16,44 @@ namespace WebApp.Controllers
             _context = context;
         }
 
-        public IActionResult Index()
+        private void WriteLog(string level, string message)
         {
-            var foods = _context.Foods
+            _context.Logs.Add(new Log
+            {
+                Level = level,
+                Message = message
+            });
+            _context.SaveChanges();
+        }
+
+        public IActionResult Index(string? title = null, int? categoryId = null, int page = 1, int count = 10)
+        {
+            var query = _context.Foods
                 .Include(f => f.FoodCategory)
                 .Include(f => f.FoodAllergens)
                     .ThenInclude(fa => fa.Allergen)
+                .AsQueryable();
+
+            if (!string.IsNullOrEmpty(title))
+                query = query.Where(f => f.Title.Contains(title));
+
+            if (categoryId.HasValue)
+                query = query.Where(f => f.FoodCategoryId == categoryId);
+
+            var total = query.Count();
+            var foods = query
+                .Skip((page - 1) * count)
+                .Take(count)
                 .ToList();
+
+            ViewBag.SearchTitle = title;
+            ViewBag.CategoryId = categoryId;
+            ViewBag.Page = page;
+            ViewBag.Count = count;
+            ViewBag.Total = total;
+            ViewBag.TotalPages = (int)Math.Ceiling((double)total / count);
+            ViewBag.Categories = new SelectList(_context.FoodCategories, "Id", "Name", categoryId);
+
             return View(foods);
         }
 
@@ -65,12 +96,13 @@ namespace WebApp.Controllers
                 });
             }
             _context.SaveChanges();
+
+            WriteLog("INFO", $"Food '{food.Title}' with id={food.Id} created.");
             return RedirectToAction("Index");
         }
 
         public IActionResult Edit(int id)
         {
-
             var food = _context.Foods
                 .Include(f => f.FoodAllergens)
                 .FirstOrDefault(x => x.Id == id);
@@ -131,6 +163,7 @@ namespace WebApp.Controllers
             }
 
             _context.SaveChanges();
+            WriteLog("INFO", $"Food '{existing.Title}' with id={id} updated.");
             return RedirectToAction("Index");
         }
 
@@ -161,6 +194,8 @@ namespace WebApp.Controllers
             _context.FoodAllergens.RemoveRange(food.FoodAllergens);
             _context.Foods.Remove(food);
             _context.SaveChanges();
+
+            WriteLog("INFO", $"Food '{food.Title}' with id={id} deleted.");
             return RedirectToAction("Index");
         }
     }

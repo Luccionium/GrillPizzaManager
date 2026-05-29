@@ -106,5 +106,19 @@ namespace WebApp.Controllers
 
             return View(orders);
         }
+
+        public IActionResult Details(int id)
+        {
+            var food = _context.Foods
+                .Include(f => f.FoodCategory)
+                .Include(f => f.FoodAllergens)
+                    .ThenInclude(fa => fa.Allergen)
+                .FirstOrDefault(x => x.Id == id);
+
+            if (food == null)
+                return NotFound();
+
+            return View(food);
+        }
     }
 }

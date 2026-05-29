@@ -2,36 +2,52 @@
 
 @{
     ViewData["Title"] = "Food";
+    int currentPage = ViewBag.Page;
+    int totalPages = ViewBag.TotalPages;
 }
 
 <h2>Food</h2>
-<a asp-action="Create" class="btn btn-primary mb-3">Add New Food</a>
+
+<!-- Search forma -->
+<form asp-action="Index" method="get" class="row mb-3">
+    <div class="col-md-4">
+        <input type="text" name="title" value="@ViewBag.SearchTitle" class="form-control" placeholder="Search by title..." />
+    </div>
+    <div class="col-md-3">
+        <select name="categoryId" asp-items="ViewBag.Categories" class="form-control">
+            <option value="">-- All Categories --</option>
+        </select>
+    </div>
+    <div class="col-md-2">
+        <select name="count" class="form-control">
+            <option value="10" selected="@(ViewBag.Count == 10)">10</option>
+            <option value="25" selected="@(ViewBag.Count == 25)">25</option>
+            <option value="50" selected="@(ViewBag.Count == 50)">50</option>
+        </select>
+    </div>
+    <div class="col-md-2">
+        <button type="submit" class="btn btn-primary">Search</button>
+    </div>
+</form>
+
+<a asp-action="Create" class="btn btn-success mb-3">Add New Food</a>
 
 <table class="table">
     <thead>
         <tr>
+            <th>Image</th>
             <th>Title</th>
             <th>Category</th>
             <th>Price</th>
             <th>Available</th>
             <th>Allergens</th>
             <th>Actions</th>
-            <th>Image</th>
         </tr>
     </thead>
     <tbody>
         @foreach (var food in Model)
         {
             <tr>
-                <td>@food.Title</td>
-                <td>@food.FoodCategory?.Name</td>
-                <td>@food.Price €</td>
-                <td>@(food.IsAvailable ? "Yes" : "No")</td>
-                <td>@string.Join(", ", food.FoodAllergens.Select(fa => fa.Allergen.Name))</td>
-                <td>
-                    <a asp-action="Edit" asp-route-id="@food.Id" class="btn btn-sm btn-warning">Edit</a>
-                    <a asp-action="Delete" asp-route-id="@food.Id" class="btn btn-sm btn-danger">Delete</a>
-                </td>
                 <td>
                     @if (!string.IsNullOrEmpty(food.ImageUrl))
                     {
@@ -42,7 +58,42 @@
                         <span class="text-muted">No image</span>
                     }
                 </td>
+                <td>@food.Title</td>
+                <td>@food.FoodCategory?.Name</td>
+                <td>@food.Price €</td>
+                <td>@(food.IsAvailable ? "Yes" : "No")</td>
+                <td>@string.Join(", ", food.FoodAllergens.Select(fa => fa.Allergen.Name))</td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@food.Id" class="btn btn-sm btn-warning">Edit</a>
+                    <a asp-action="Delete" asp-route-id="@food.Id" class="btn btn-sm btn-danger">Delete</a>
+                </td>
             </tr>
         }
     </tbody>
 </table>
+
+<!-- Straničenje -->
+<nav>
+    <ul class="pagination">
+        <li class="page-item @(currentPage <= 1 ? "disabled" : "")">
+            <a class="page-link" asp-action="Index" asp-route-page="@(currentPage - 1)"
+               asp-route-title="@ViewBag.SearchTitle" asp-route-categoryId="@ViewBag.CategoryId"
+               asp-route-count="@ViewBag.Count">Previous</a>
+        </li>
+        @for (int i = 1; i <= totalPages; i++)
+        {
+            <li class="page-item @(i == currentPage ? "active" : "")">
+                <a class="page-link" asp-action="Index" asp-route-page="@i"
+                   asp-route-title="@ViewBag.SearchTitle" asp-route-categoryId="@ViewBag.CategoryId"
+                   asp-route-count="@ViewBag.Count">@i</a>
+            </li>
+        }
+        <li class="page-item @(currentPage >= totalPages ? "disabled" : "")">
+            <a class="page-link" asp-action="Index" asp-route-page="@(currentPage + 1)"
+               asp-route-title="@ViewBag.SearchTitle" asp-route-categoryId="@ViewBag.CategoryId"
+               asp-route-count="@ViewBag.Count">Next</a>
+        </li>
+    </ul>
+</nav>
+
+<p class="text-muted">Showing page @currentPage of @totalPages (Total: @ViewBag.Total items)</p>
