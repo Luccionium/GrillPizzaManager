@@ -1,9 +1,15 @@
 ﻿@{
-    ViewData["Title"] = "Početna";
+    ViewData["Title"] = "Home";
 }
 
-<div class="text-center mt-5">
-    <h1 class="display-4">Dobrodošli u GrillPizza!</h1>
-    <p class="lead">Naručite svoju omiljenu hranu s roštilja i pizzu s dostavom na vašu adresu.</p>
-    <hr class="my-4">
+<div class="hero-section d-flex align-items-center justify-content-center text-center text-black"
+    style="min-height: calc(100vh - 56px);">
+    <div>
+        <h1 class="display-3 fw-bold mb-3">GrillPizza</h1>
+        <p class="lead mb-4 fs-4">Svježa hrana s roštilja i pećnice — dostavljena do vaših vrata</p>
+        <a asp-controller="Menu" asp-action="Index" class="btn btn-lg px-5 py-3 fw-bold"
+           style="background-color: #C85855; color: white; border: none; font-size: 1.2rem;">
+            Pogledaj meni →
+        </a>
+    </div>
 </div>

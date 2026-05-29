@@ -15,21 +15,13 @@ namespace WebApp.Controllers
             _context = context;
         }
 
-        public IActionResult Index(int? categoryId)
+        public IActionResult Index(int? categoryId = null, string? title = null)
         {
             var categories = _context.FoodCategories.ToList();
             ViewBag.Categories = categories;
             ViewBag.SelectedCategory = categoryId;
-
-            var foods = _context.Foods
-                .Include(f => f.FoodCategory)
-                .Include(f => f.FoodAllergens)
-                    .ThenInclude(fa => fa.Allergen)
-                .Where(f => f.IsAvailable)
-                .Where(f => categoryId == null || f.FoodCategoryId == categoryId)
-                .ToList();
-
-            return View(foods);
+            ViewBag.SearchTitle = title;
+            return View();
         }
 
         [Authorize]
@@ -119,6 +111,36 @@ namespace WebApp.Controllers
                 return NotFound();
 
             return View(food);
+        }
+
+        public IActionResult SearchPartial(int? categoryId = null, string? title = null, int page = 1, int count = 8)
+        {
+            var query = _context.Foods
+                .Include(f => f.FoodCategory)
+                .Include(f => f.FoodAllergens)
+                    .ThenInclude(fa => fa.Allergen)
+                .Where(f => f.IsAvailable)
+                .AsQueryable();
+
+            if (categoryId.HasValue)
+                query = query.Where(f => f.FoodCategoryId == categoryId);
+
+            if (!string.IsNullOrEmpty(title))
+                query = query.Where(f => f.Title.Contains(title));
+
+            var total = query.Count();
+            var foods = query
+                .Skip((page - 1) * count)
+                .Take(count)
+                .ToList();
+
+            ViewBag.CurrentPage = page;
+            ViewBag.TotalPages = (int)Math.Ceiling((double)total / count);
+            ViewBag.CategoryId = categoryId;
+            ViewBag.SearchTitle = title;
+            ViewBag.Count = count;
+
+            return PartialView("_MenuPartial", foods);
         }
     }
 }

@@ -1,87 +1,127 @@
-﻿@model IEnumerable<WebApp.Models.Food>
-
-@{
+﻿@{
     ViewData["Title"] = "Menu";
 }
 
 <h2>Our Menu</h2>
 
-<!-- Filter by category -->
+<!-- Filter -->
+<div class="mb-3 d-flex gap-2 flex-wrap">
+    <input type="text" id="searchTitle" class="form-control w-auto" placeholder="Search food..." value="@ViewBag.SearchTitle" />
+    <button id="searchBtn" class="btn btn-outline-primary">Search</button>
+    <button id="clearBtn" class="btn btn-outline-secondary">Clear</button>
+</div>
+
 <div class="mb-3">
-    <a asp-action="Index" class="btn @(ViewBag.SelectedCategory == null ? "btn-primary" : "btn-outline-primary") me-1">All</a>
+    <button class="btn @(ViewBag.SelectedCategory == null ? "btn-primary" : "btn-outline-primary") me-1"
+            data-category="">
+        All
+    </button>
     @foreach (var category in ViewBag.Categories as List<WebApp.Models.FoodCategory>)
     {
-        <a asp-action="Index" asp-route-categoryId="@category.Id"
-           class="btn @(ViewBag.SelectedCategory == category.Id ? "btn-primary" : "btn-outline-primary") me-1">
+        <button class="btn @(ViewBag.SelectedCategory != null && ViewBag.SelectedCategory == category.Id ? "btn-primary" : "btn-outline-primary") me-1 category-btn"
+                data-category="@category.Id">
             @category.Name
-        </a>
+        </button>
     }
 </div>
 
-<!-- Food grid -->
-<div class="row">
-    @foreach (var food in Model)
-    {
-        <div class="col-md-4 mb-4">
-            <div class="card h-100">
-                @if (!string.IsNullOrEmpty(food.ImageUrl))
-                {
-                    <img src="@food.ImageUrl" class="card-img-top" alt="@food.Title" style="height:200px; object-fit:cover;" />
-                }
-                <div class="card-body">
-                    <h5 class="card-title">@food.Title</h5>
-                    <p class="card-text text-muted">@food.Description</p>
-                    @if (food.FoodAllergens.Any())
-                    {
-                        <p class="card-text">
-                            <small class="text-danger">
-                                Allergens: @string.Join(", ", food.FoodAllergens.Select(fa => fa.Allergen.Name))
-                            </small>
-                        </p>
-                    }
-                    <p class="card-text"><strong>@food.Price €</strong></p>
-                </div>
-                <div class="card-footer">
-                    <a asp-action="Details" asp-route-id="@food.Id" class="btn btn-secondary btn-sm">Details</a>
-                    <button class="btn btn-primary btn-sm add-to-cart"
-                            data-id="@food.Id"
-                            data-title="@food.Title"
-                            data-price="@food.Price">
-                        Add to Cart
-                    </button>
-                </div>
-            </div>
-        </div>
-    }
-</div>
+<!-- Partial placeholder -->
+<div id="menuPlaceholder"></div>
 
-<!-- Cart summary -->
+<!-- Cart bar -->
 <div class="fixed-bottom bg-light p-3 border-top" id="cartBar" style="display:none;">
     <div class="container d-flex justify-content-between align-items-center">
         <span id="cartSummary"></span>
-        <a asp-action="Cart" class="btn btn-success">Proceed to Order</a>
+        <a asp-controller="Menu" asp-action="Cart" class="btn btn-success">Proceed to Order</a>
     </div>
 </div>
 
 @section Scripts {
     <script>
         let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+        let currentPage = 1;
+        let currentCategory = @(ViewBag.SelectedCategory ?? (object)"null");
+        let currentTitle = '@(ViewBag.SearchTitle ?? "")';
+
         updateCartBar();
+        loadMenu();
 
-        $('.add-to-cart').click(function () {
-            const id = $(this).data('id');
-            const title = $(this).data('title');
-            const price = parseFloat($(this).data('price'));
+        function loadMenu() {
+            let url = `/Menu/SearchPartial?page=${currentPage}`;
+            if (currentCategory) url += `&categoryId=${currentCategory}`;
+            if (currentTitle) url += `&title=${currentTitle}`;
 
-            const existing = cart.find(x => x.id === id);
-            if (existing) {
-                existing.quantity++;
-            } else {
-                cart.push({ id, title, price, quantity: 1 });
-            }
+            $('#menuPlaceholder').load(url, function () {
+                bindPagination();
+                bindAddToCart();
+            });
+        }
 
-            localStorage.setItem('cart', JSON.stringify(cart));
-            updateCartBar();
+        function bindPagination() {
+            $('.page-num').click(function (e) {
+                e.preventDefault();
+                currentPage = parseInt($(this).data('page'));
+                loadMenu();
+            });
+
+            $('.prev-page').click(function (e) {
+                e.preventDefault();
+                if (currentPage > 1) {
+                    currentPage--;
+                    loadMenu();
+                }
+            });
+
+            $('.next-page').click(function (e) {
+                e.preventDefault();
+                currentPage++;
+                loadMenu();
+            });
+        }
+
+        function bindAddToCart() {
+            $('.add-to-cart').click(function () {
+                const id = $(this).data('id');
+                const title = $(this).data('title');
+                const price = parseFloat($(this).data('price'));
+
+                const existing = cart.find(x => x.id === id);
+                if (existing) {
+                    existing.quantity++;
+                } else {
+                    cart.push({ id, title, price, quantity: 1 });
+                }
+
+                localStorage.setItem('cart', JSON.stringify(cart));
+                updateCartBar();
+            });
+        }
+
+        $('.category-btn, button[data-category=""]').click(function () {
+            const cat = $(this).data('category');
+            currentCategory = cat || null;
+            currentPage = 1;
+
+            $('.category-btn, button[data-category=""]').removeClass('btn-primary').addClass('btn-outline-primary');
+            $(this).removeClass('btn-outline-primary').addClass('btn-primary');
+
+            loadMenu();
+        });
+
+        $('#searchBtn').click(function () {
+            currentTitle = $('#searchTitle').val();
+            currentPage = 1;
+            loadMenu();
+        });
+
+        $('#clearBtn').click(function () {
+            currentTitle = '';
+            currentCategory = null;
+            currentPage = 1;
+            $('#searchTitle').val('');
+            $('.category-btn, button[data-category=""]').removeClass('btn-primary').addClass('btn-outline-primary');
+            $('button[data-category=""]').removeClass('btn-outline-primary').addClass('btn-primary');
+            loadMenu();
         });
 
         function updateCartBar() {

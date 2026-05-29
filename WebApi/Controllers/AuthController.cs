@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -147,6 +148,41 @@ namespace WebApi.Controllers
                 var tokenString = tokenHandler.WriteToken(token);
 
                 return Ok(new { token = tokenString });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        [Authorize]
+        [HttpPost("changepassword")]
+        public ActionResult ChangePassword([FromBody] ChangePasswordDto dto)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                    return BadRequest(ModelState);
+
+                var username = HttpContext.User.Identity?.Name;
+                var user = _context.Users.FirstOrDefault(x => x.Username == username);
+                if (user == null)
+                    return NotFound();
+
+                // Provjeri trenutnu lozinku
+                var currentHash = PasswordHashProvider.GetHash(dto.CurrentPassword!, user.PwdSalt);
+                if (currentHash != user.PwdHash)
+                    return BadRequest("Current password is incorrect");
+
+                // Postavi novu lozinku
+                var newSalt = PasswordHashProvider.GetSalt();
+                var newHash = PasswordHashProvider.GetHash(dto.NewPassword!, newSalt);
+
+                user.PwdHash = newHash;
+                user.PwdSalt = newSalt;
+                _context.SaveChanges();
+
+                return Ok("Password changed successfully");
             }
             catch (Exception ex)
             {

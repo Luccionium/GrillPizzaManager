@@ -1,0 +1,66 @@
+﻿@model IEnumerable<WebApp.Models.Food>
+
+@{
+    int currentPage = ViewBag.CurrentPage;
+    int totalPages = ViewBag.TotalPages;
+}
+
+<div class="row">
+    @foreach (var food in Model)
+    {
+        <div class="col-md-3 mb-4">
+            <div class="card h-100">
+                @if (!string.IsNullOrEmpty(food.ImageUrl))
+                {
+                    <img src="@food.ImageUrl" class="card-img-top" alt="@food.Title" style="height:200px; object-fit:cover;" />
+                }
+                else
+                {
+                    <div class="card-img-top bg-secondary d-flex align-items-center justify-content-center" style="height:200px;">
+                        <span class="text-white">No image</span>
+                    </div>
+                }
+                <div class="card-body">
+                    <h5 class="card-title">@food.Title</h5>
+                    <p class="card-text text-muted small">@food.Description</p>
+                    @if (food.FoodAllergens.Any())
+                    {
+                        <p class="card-text">
+                            <small class="text-danger">
+                                Allergens: @string.Join(", ", food.FoodAllergens.Select(fa => fa.Allergen.Name))
+                            </small>
+                        </p>
+                    }
+                    <p class="card-text"><strong>@food.Price €</strong></p>
+                </div>
+                <div class="card-footer">
+                    <a asp-controller="Menu" asp-action="Details" asp-route-id="@food.Id" class="btn btn-secondary btn-sm">Details</a>
+                    <button class="btn btn-primary btn-sm add-to-cart"
+                            data-id="@food.Id"
+                            data-title="@food.Title"
+                            data-price="@food.Price">
+                        Add to Cart
+                    </button>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<!-- Straničenje -->
+<nav>
+    <ul class="pagination justify-content-center">
+        <li class="page-item @(currentPage <= 1 ? "disabled" : "")">
+            <a class="page-link prev-page" href="#">Previous</a>
+        </li>
+        @for (int i = Math.Max(1, currentPage - 2); i <= Math.Min(totalPages, currentPage + 2); i++)
+        {
+            <li class="page-item @(i == currentPage ? "active" : "")">
+                <a class="page-link page-num" href="#" data-page="@i">@i</a>
+            </li>
+        }
+        <li class="page-item @(currentPage >= totalPages ? "disabled" : "")">
+            <a class="page-link next-page" href="#">Next</a>
+        </li>
+    </ul>
+</nav>
